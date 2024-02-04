@@ -10,6 +10,13 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+      KAFKA_OPTS:
+        -Djava.security.auth.login.config=/etc/kafka/zookeeper_server_jaas.conf
+        -Dzookeeper.authProvider.1=org.apache.zookeeper.server.auth.SASLAuthenticationProvider
+        -Dzookeeper.allowSaslFailedClients=false
+        -Dzookeeper.requireClientAuthScheme=sasl
+    volumes:
+      - ./kafka/zookeeper.sasl.jaas.config:/etc/kafka/zookeeper_server_jaas.conf
     networks:
       - kafka-net
 
@@ -24,11 +31,18 @@ services:
       - "9101:9101"
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: SASL_PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: SASL_PLAINTEXT:SASL_PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAIN
+      KAFKA_INTER_BROKER_LISTENER_NAME: SASL_PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_SASL_MECHANISM: PLAIN
+      KAFKA_SASL_ENABLED_MECHANISMS: PLAIN
+      KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
+    volumes:
+      - ./kafka/kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf
+      - ./kafka/client.properties:/tmp/client.properties
     networks:
       - kafka-net
 
@@ -42,8 +56,11 @@ services:
       - "8081:8081"
     environment:
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
-      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: SASL_PLAINTEXT://kafka:9092
+      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_MECHANISM: PLAIN
+      SCHEMA_REGISTRY_KAFKASTORE_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username=${KAFKA_USERNAME} password=${KAFKA_PASSWORD};
     networks:
       - kafka-net
 
@@ -71,13 +88,17 @@ services:
     restart: on-failure
     container_name: kowl
     ports:
-        - "8080:8080"
+      - "8080:8080"
     depends_on:
-        - kafka
+      - kafka
     environment:
-      KAFKA_BROKERS: "kafka:29092"
+      KAFKA_BROKERS: kafka:9092
       KAFKA_SCHEMAREGISTRY_ENABLED: "true"
       KAFKA_SCHEMAREGISTRY_URLS: "http://schema-registry:8081"
+      KAFKA_SASL_ENABLED: "true"
+      KAFKA_SASL_MECHANISM: "PLAIN"
+      KAFKA_SASL_USERNAME: ${KAFKA_USERNAME}
+      KAFKA_SASL_PASSWORD: ${KAFKA_PASSWORD}
     networks:
       - kafka-net
 
@@ -109,7 +130,7 @@ services:
     ports:
       - "8083:8083"
     environment:
-      CONNECT_BOOTSTRAP_SERVERS: 'kafka:29092'
+      CONNECT_BOOTSTRAP_SERVERS: kafka:9092
       CONNECT_REST_ADVERTISED_HOST_NAME: "kafka-connect"
       CONNECT_REST_PORT: 8083
       CONNECT_GROUP_ID: "kafka-connect-group1"
@@ -125,6 +146,9 @@ services:
       CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
       CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
       CONNECT_LOG4J_LOGGERS: org.apache.zookeeper=ERROR,org.I0Itec.zkclient=ERROR,org.reflections=ERROR
+      CONNECT_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      CONNECT_SASL_MECHANISM: PLAIN
+      CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username=${KAFKA_USERNAME} password=${KAFKA_PASSWORD};
     command:
       - bash
       - -c
@@ -152,11 +176,11 @@ services:
               "name": "postgres-cdc-demo",
               "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
               "database.hostname": "postgres_db",
-              "database.port": "5432",
-              "database.user": "mamun",
-              "database.password": "123",
+              "database.port": "${MASTER_DB_PORT}",
+              "database.user": "${MASTER_DB_USER}",
+              "database.password": "${MASTER_DB_PASSWORD}",
               "database.server.name": "DockerServer",
-              "database.dbname": "postgres",
+              "database.dbname": "${MASTER_DB_NAME}",
               "tasks.max": "1",
               "plugin.name": "pgoutput"
           }'
