@@ -1,4 +1,4 @@
-version: '2.1'
+version: "2.1"
 
 services:
   zookeeper:
@@ -149,6 +149,9 @@ services:
       CONNECT_SECURITY_PROTOCOL: SASL_PLAINTEXT
       CONNECT_SASL_MECHANISM: PLAIN
       CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username=${KAFKA_USERNAME} password=${KAFKA_PASSWORD};
+      CONNECT_PRODUCER_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      CONNECT_PRODUCER_SASL_MECHANISM: PLAIN
+      CONNECT_PRODUCER_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username=${KAFKA_USERNAME} password=${KAFKA_PASSWORD};
     command:
       - bash
       - -c
