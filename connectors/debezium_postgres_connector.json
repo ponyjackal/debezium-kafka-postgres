@@ -1,0 +1,14 @@
+{
+  "name": "user",
+  "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+  "database.hostname": "${MASTER_DB_HOST}",
+  "database.port": "${MASTER_DB_PORT}",
+  "database.user": "${MASTER_DB_USER}",
+  "database.password": "${MASTER_DB_PASSWORD}",
+  "database.server.name": "user",
+  "database.dbname": "${MASTER_DB_NAME}",
+  "tasks.max": "1",
+  "plugin.name": "pgoutput",
+  "topic.prefix": "user",
+  "table.include.list": "public.user"
+}

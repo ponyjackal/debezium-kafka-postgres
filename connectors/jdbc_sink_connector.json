@@ -1,0 +1,18 @@
+{
+  "name": "newuser",
+  "connector.class": "io.debezium.connector.jdbc.JdbcSinkConnector",
+  "tasks.max": "1",
+  "connection.url": "jdbc:postgresql://${MASTER_DB_HOST}:${MASTER_DB_PORT}/${MASTER_DB_NAME}",
+  "connection.username": "${MASTER_DB_USER}",
+  "connection.password": "${MASTER_DB_PASSWORD}",
+  "insert.mode": "upsert",
+  "delete.enabled": "true",
+  "primary.key.mode": "record_key",
+  "primary.key.fields": "id",
+  "schema.evolution": "basic",
+  "auto.evolve": "true",
+  "database.time_zone": "UTC",
+  "topics": "user.public.user",
+  "fields.whitelist": "name,avatar",
+  "table.name.format": "new_user"
+}
