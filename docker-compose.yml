@@ -2,7 +2,7 @@ version: "2.1"
 
 services:
   zookeeper:
-    image: confluentinc/cp-zookeeper:6.2.0
+    image: confluentinc/cp-zookeeper:latest
     hostname: zookeeper
     container_name: zookeeper
     ports:
@@ -21,7 +21,7 @@ services:
       - kafka-net
 
   kafka:
-    image: confluentinc/cp-kafka:6.2.0
+    image: confluentinc/cp-kafka:latest
     hostname: kafka
     container_name: kafka
     depends_on:
@@ -47,7 +47,7 @@ services:
       - kafka-net
 
   schema-registry:
-    image: confluentinc/cp-schema-registry:6.2.0
+    image: confluentinc/cp-schema-registry:latest
     hostname: schema-registry
     container_name: schema-registry
     depends_on:
@@ -116,7 +116,7 @@ services:
       - kafka-net
 
   kafka-connect:
-    image: confluentinc/cp-kafka-connect-base:6.2.0
+    image: confluentinc/cp-kafka-connect:latest
     hostname: kafka-connect
     container_name: kafka-connect
     depends_on:
@@ -149,6 +149,9 @@ services:
       CONNECT_SECURITY_PROTOCOL: SASL_PLAINTEXT
       CONNECT_SASL_MECHANISM: PLAIN
       CONNECT_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username=${KAFKA_USERNAME} password=${KAFKA_PASSWORD};
+      CONNECT_CONSUMER_SECURITY_PROTOCOL: SASL_PLAINTEXT
+      CONNECT_CONSUMER_SASL_MECHANISM: PLAIN
+      CONNECT_CONSUMER_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username=${KAFKA_USERNAME} password=${KAFKA_PASSWORD};
       CONNECT_PRODUCER_SECURITY_PROTOCOL: SASL_PLAINTEXT
       CONNECT_PRODUCER_SASL_MECHANISM: PLAIN
       CONNECT_PRODUCER_SASL_JAAS_CONFIG: org.apache.kafka.common.security.plain.PlainLoginModule required username=${KAFKA_USERNAME} password=${KAFKA_PASSWORD};
