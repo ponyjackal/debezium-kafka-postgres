@@ -10,5 +10,11 @@
   "tasks.max": "1",
   "plugin.name": "pgoutput",
   "topic.prefix": "user",
-  "table.include.list": "public.user"
+  "table.include.list": "public.user",
+  "transforms": "unwrap",
+  "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+  "transforms.unwrap.add.fields": "op",
+  "transforms.unwrap.delete.handling.mode": "none",
+  "transforms.unwrap.drop.tombstones": "false",
+  "transforms.unwrap.operation.header": "true"
 }
