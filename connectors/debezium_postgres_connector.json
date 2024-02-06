@@ -11,7 +11,6 @@
   "plugin.name": "pgoutput",
   "topic.prefix": "user",
   "table.include.list": "public.user",
-  "column.include.list": "name,avatar",
   "transforms": "unwrap",
   "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
   "transforms.unwrap.add.fields": "op",
